@@ -13,79 +13,91 @@ manifest file
 in the [`docker-library/official-images` GitHub
 repo](https://github.com/docker-library/official-images).
 
-# What is PostgreSQL?
-
-PostgreSQL, often simply "Postgres", is an object-relational database management
-system (ORDBMS) with an emphasis on extensibility and standards-compliance. As a
-database server, its primary function is to store data, securely and supporting
-best practices, and retrieve it later, as requested by other software
-applications, be it those on the same computer or those running on another
-computer across a network (including the Internet). It can handle workloads
-ranging from small single-machine applications to large Internet-facing
-applications with many concurrent users. Recent versions also provide
-replication of the database itself for security and scalability.
-
-PostgreSQL implements the majority of the SQL:2011 standard, is ACID-compliant
-and transactional (including most DDL statements) avoiding locking issues using
-multiversion concurrency control (MVCC), provides immunity to dirty reads and
-full serializability; handles complex SQL queries using many indexing methods
-that are not available in other databases; has updateable views and materialized
-views, triggers, foreign keys; supports functions and stored procedures, and
-other expandability, and has a large number of extensions written by third
-parties. In addition to the possibility of working with the major proprietary
-and open source databases, PostgreSQL supports migration from them, by its
-extensive standard SQL support and available migration tools. And if proprietary
-extensions had been used, by its extensibility that can emulate many through
-some built-in and third-party open source compatibility extensions, such as for
-Oracle.
-
-> [wikipedia.org/wiki/PostgreSQL](https://en.wikipedia.org/wiki/PostgreSQL)
 
 ![logo](https://raw.githubusercontent.com/docker-library/docs/master/postgres/logo.png)
 
-# How to use this image
+# Using the image
+This image is based on a forked version of [official](https://registry.hub.docker.com/_/postgres/) image with few modifications.
 
-## start a postgres instance
+* Use of [data container](http://docs.docker.com/userguide/dockervolumes/) to manage the postgresql data(PGDATA) folder.
+* Extend the image using custom configuration files.
+* Allow to create additional admin superuser during container creation.
 
-    docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
 
-This image includes `EXPOSE 5432` (the postgres port), so standard container
-linking will make it automatically available to the linked containers. The
-default `postgres` user and database are created in the entrypoint with
-`initdb`.
-> The postgres database is a default database meant for use by users, utilities
-> and third party applications.
-> [postgresql.org/docs](http://www.postgresql.org/docs/9.3/interactive/app-initdb.html)
+## Staring an container
 
-## connect to it from an application
+    docker run --name pgdata -v /var/lib/postgresql/data busybox echo data only container for postgresql
 
-    docker run --name some-app --link some-postgres:postgres -d application-that-uses-postgres
+    docker run --name some-postgres --volumes-from pgdata \ 
+    -p 5432:5432 -e ADMIN_USER=admin -e ADMIN_PASS=admin \
+    ADMIN_DB=admin -d postgres
 
-## ... or via `psql`
+This above commands will 
+* Initialize the default setup in the given data container folder
+  `/var/lib/postgresql/data`
+* Create the default postgresql user with password `postgresql`
+* Create another superuser along with its default database that could be used
+  for further database administration
+* Exposes port `5432`
+* Includes a `pg_hba.conf` file that make postgresql` user accessible only
+  through unix socket. The additional superuser can access it from anywhere
+  with password.
 
-    docker run -it --link some-postgres:postgres --rm postgres sh -c 'exec psql -h "$POSTGRES_PORT_5432_TCP_ADDR" -p "$POSTGRES_PORT_5432_TCP_PORT" -U postgres'
+
+## Using the container
+
+### From the host of the container
+    
+    psql -U $ADMIN_USER $ADMIN_DB
+
+## Link it to another application container
+
+    docker run --name some-app --rm  --link some-postgres:postgres -d application-that-uses-postgres
+
+    Now the application container can access the postgres database using the
+    environment variables and container name(through /etc/hosts). For details
+    about linking of docker containers look
+    [here](http://docs.docker.com/userguide/dockerlinks/) 
 
 ## Environment Variables
 
-The PostgreSQL image uses several environment variables which are easy to miss.
-While none of the variables are required, they may significantly aid you in
-using the image.
+The PostgreSQL image uses several optional environment variables which are
+handy for communicating with the database.
 
 ### `POSTGRES_PASSWORD`
 
-This environment variable is recommend for you to use the PostgreSQL image. This
-environment variable sets the superuser password for PostgreSQL. The default
-superuser is defined by the `POSTGRES_USER` environment variable. In the above
-example, it is being set to "mysecretpassword".
+This environment variable sets the **postgres** superuser  password for
+PostgreSQL.  The default password will be **postgres**. Remember the `postgres`
+user will only be accessible locally through unix socket. It means you can
+login only from inside a running container.
 
-### `POSTGRES_USER`
 
-This optional environment variable is used in conjunction with
-`POSTGRES_PASSWORD` to set a user and its password. This varible will create the
-specified user with superuser power and a database with the same name. If it is
-not specified, then the default user of `postgres` will be used.
+    docker run --name pgdata -v /var/lib/postgresql/data busybox echo data only container for postgresql
 
-# How to extend this image
+    docker run --name some-postgres --volumes-from pgdata \ 
+    -p 5432:5432 -e POSTGRES_PASSWORD=zombie postgres
+
+### `ADMIN_USER`, `ADMIN_PASS`, `ADMIN_DB`
+
+Use these variables to setup an additional superuser. This superuser will be
+accessible from anywhere and therefore could be used for administrative purpose.
+If `ADMIN_DB` is unset, the value of `ADMIN_USER` is by default.
+
+
+    docker run --name pgdata -v /var/lib/postgresql/data busybox echo data only container for postgresql
+
+    docker run --name some-postgres --volumes-from pgdata \ 
+    -p 5432:5432 -e ADMIN_USER=admin -e ADMIN_PASS=admin \
+    ADMIN_DB=admin -d postgres
+
+    docker run --name some-postgres --volumes-from pgdata \ 
+    -p 5432:5432 -e ADMIN_USER=admin -e ADMIN_PASS=admin \
+    -d postgres
+
+
+# Extending this image
+
+## Initialization
 
 If you would like to do additional initialization in an image derived from this
 one, add a `*.sh` script under `/docker-entrypoint-initdb.d` (creating the
@@ -96,6 +108,57 @@ need to execute SQL commands as part of your initialization, the use of
 Postgres'' [single user
 mode](http://www.postgresql.org/docs/9.3/static/app-postgres.html#AEN90580) is
 highly recommended.
+
+    # Example Dockerfile
+    FROM dictybase/postgres:latest
+    MAINTAINER Siddhartha Basu
+    RUN mkdir -p /docker-entrypoint-initdb
+    COPY custom_init.sh /docker-entrypoint-initdb/
+
+## Configuration
+
+To change the behavior or running server, custom config file(s) could be added
+to any of the derivative image. The config file(s) will be sourced by the
+default `postgresql.conf` file and will override any default settings. 
+
+### For versions `9.3` and `9.4`
+
+Add any number of `*.conf` file under `/conf` folder. All the `*.conf` files
+will be moved to `conf.d` folder under `$PGDATA` which in turned will be
+sourced by the `include_dir` directive in `postgresql.conf` file. For an
+ordered loading of config files, prepend numbers in their names, like
+`00first.conf`, `02second.conf` etc.
+
+    # Example Dockerfile
+    FROM dictybase/postgres:latest
+    MAINTAINER Siddhartha Basu
+    RUN mkdir -p /conf
+    COPY *.conf /conf/
+
+### For versions below `9.3`
+
+These versions do not `include_dir` directive, so only a hardcoded list of
+config files are supported. The following named config files are supported.  
+
+    shared.conf
+    server.conf
+    memory.conf
+    query.conf
+    log.conf
+    statistics.conf
+    vaccuam.conf
+    custom.conf
+
+Place any one or more of the config files(s) under the `/conf` folder in any of
+the derivative image. The config files are loaded in the order given above.
+
+    # Example Dockerfile
+    FROM dictybase/postgres:9.2
+    MAINTAINER Siddhartha Basu
+    RUN mkdir -p /conf
+    COPY memory.conf /conf/
+    COPY log.conf /conf/
+ 
 
 # Caveats
 
