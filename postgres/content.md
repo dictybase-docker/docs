@@ -39,10 +39,10 @@ This above commands will
 
     docker run --name some-app --rm  --link some-postgres:postgres -d application-that-uses-postgres
 
-    Now the application container can access the postgres database using the
-    environment variables and container name(through /etc/hosts). For details
-    about linking of docker containers look
-    [here](http://docs.docker.com/userguide/dockerlinks/) 
+Now the application container can access the postgres database using the
+environment variables and container name(through /etc/hosts). For details
+about linking of docker containers look
+[here](http://docs.docker.com/userguide/dockerlinks/) 
 
 ## Environment Variables
 
