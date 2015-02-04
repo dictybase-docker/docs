@@ -1,10 +1,8 @@
 # What is this?
 
-This repository contains the docs for each of the Docker official images.  See
-[docker-library/official-images](https://github.com/docker-library/official-images)
-for the configuration how the images are built.  To see all of the official
-images go to the
-[hub](https://registry.hub.docker.com/repos/stackbrew/?&s=alphabetical).
+This repository contains the docs for both the Docker and dictyBase customized official images.  See
+[dictybase-docker/official-images](https://github.com/dictybase-docker/official-images)
+for the configuration how the images are built.  
 
 # How do I add a new image's docs
 
