@@ -9,7 +9,7 @@ This image is based on a forked version of [official](https://registry.hub.docke
 * Allow to create additional admin superuser during container creation.
 
 
-## Staring an container
+## Staring a container
 
     docker run --name pgdata -v /var/lib/postgresql/data busybox echo data only container for postgresql
 
