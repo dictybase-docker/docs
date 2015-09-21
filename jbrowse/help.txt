@@ -1,0 +1,33 @@
+NAME:
+   jbrowse - A new cli application
+
+USAGE:
+   jbrowse [global options] command [command options] [arguments...]
+
+VERSION:
+   1.0.0
+
+COMMANDS:
+   serve	A http static file server for jbrowse
+   help, h	Shows a list of commands or help for one command
+   
+GLOBAL OPTIONS:
+   --help, -h		show help
+   --version, -v	print the version
+   
+NAME:
+   serve - A http static file server for jbrowse
+
+USAGE:
+   command serve [command options] [arguments...]
+
+DESCRIPTION:
+   
+
+OPTIONS:
+   --jbrowse-folder, --jf 		Location of jbrowse source folder [$JBROWSE_FOLDER]
+   --port, -p '9595'			http port, default is 9595
+   --log-folder, -f '/log/jbrowse'	Folder where the log file will be kept
+   --log-file, -l 'frontend.log'	Name of the log file, the logging is done in apache combined log format
+   --no-stderr				Turn off stderr logging, on by default
+   
