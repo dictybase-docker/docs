@@ -14,7 +14,7 @@ use Term::UI;
 use Term::ReadLine;
 
 my $hubLengthLimit = 25_000;
-my $githubBase = 'https://github.com/docker-library/docs/tree/master';
+my $githubBase = 'https://github.com/dictybase-docker/docs/tree/master';
 
 my $username;
 my $password;
