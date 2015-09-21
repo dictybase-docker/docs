@@ -1,132 +1,125 @@
 # Supported tags and respective `Dockerfile` links
 
-- [`8.5.5`, `latest` (*websphere-liberty/8.5.5/Dockerfile*)](https://github.com/WASdev/ci.docker/blob/f7c3cf46801e5748b6a9227a8c8e5ad3f544fc4a/websphere-liberty/8.5.5/Dockerfile)
+-	[`kernel`, `8.5.5.7-kernel` (*websphere-liberty/8.5.5/developer/kernel/Dockerfile*)](https://github.com/WASdev/ci.docker/blob/9da673b7e3c9d69197e67f9be276a60702674909/websphere-liberty/8.5.5/developer/kernel/Dockerfile)
+-	[`common`, `8.5.5.7-common` (*websphere-liberty/8.5.5/developer/common/Dockerfile*)](https://github.com/WASdev/ci.docker/blob/9da673b7e3c9d69197e67f9be276a60702674909/websphere-liberty/8.5.5/developer/common/Dockerfile)
+-	[`webProfile6`, `8.5.5.7-webProfile6` (*websphere-liberty/8.5.5/developer/webProfile6/Dockerfile*)](https://github.com/WASdev/ci.docker/blob/9da673b7e3c9d69197e67f9be276a60702674909/websphere-liberty/8.5.5/developer/webProfile6/Dockerfile)
+-	[`webProfile7`, `8.5.5.7-webProfile7` (*websphere-liberty/8.5.5/developer/webProfile7/Dockerfile*)](https://github.com/WASdev/ci.docker/blob/9da673b7e3c9d69197e67f9be276a60702674909/websphere-liberty/8.5.5/developer/webProfile7/Dockerfile)
+-	[`javaee7`, `8.5.5.7-javaee7`, `8.5.5.7`, `8.5.5`, `latest` (*websphere-liberty/8.5.5/developer/javaee7/Dockerfile*)](https://github.com/WASdev/ci.docker/blob/9da673b7e3c9d69197e67f9be276a60702674909/websphere-liberty/8.5.5/developer/javaee7/Dockerfile)
+-	[`beta` (*websphere-liberty/beta/Dockerfile*)](https://github.com/WASdev/ci.docker/blob/65818b1c55cce5c9eac55c8ece2c2bc97f789d9d/websphere-liberty/beta/Dockerfile)
 
-For more information about this image and its history, please see the [relevant
-manifest file
-(`library/websphere-liberty`)](https://github.com/docker-library/official-images/blob/master/library/websphere-liberty)
-in the [`docker-library/official-images` GitHub
-repo](https://github.com/docker-library/official-images).
+For more information about this image and its history, please see [the relevant manifest file (`library/websphere-liberty`)](https://github.com/docker-library/official-images/blob/master/library/websphere-liberty). This image is updated via pull requests to [the `docker-library/official-images` GitHub repo](https://github.com/docker-library/official-images).
 
-# Overview 
+For detailed information about the virtual/transfer sizes and individual layers of each of the above supported tags, please see [the `websphere-liberty/tag-details.md` file](https://github.com/docker-library/docs/blob/master/websphere-liberty/tag-details.md) in [the `docker-library/docs` GitHub repo](https://github.com/docker-library/docs).
 
-This image contains IBM WebSphere Application Server for Developers Liberty
-Profile and the IBM Java Runtime Environment. For more information on WebSphere
-Application Server Liberty Profile, see the [WASdev][getting-started] site.
+# Overview
+
+The images in this repository contain IBM WebSphere Application Server for Developers Liberty Profile. For more information on WebSphere Application Server Liberty, see the [WASdev](https://developer.ibm.com/wasdev/docs/category/getting-started/) site. Due to the current lack of geographic export controls on Docker Hub it has been necessary to remove the IBM Java Runtime Environment from these images. The images now build on the Debian based `java:jre` OpenJRE official repository image. To build an Ubuntu image with the IBM JRE, use the Dockerfiles available in the [ibmjre](https://github.com/WASdev/ci.docker/tree/ibmjre/websphere-liberty/8.5.5) branch on GitHub.
+
+# Images
+
+There are multiple images available in this repository. The image with the tag `beta` contains the contents of the runtime JAR for the latest monthly beta. The other images are all based on the latest generally available fix pack.
+
+The `kernel` image contains just the Liberty kernel and no additional runtime features. This image can be used as the basis for custom built images that contain only the features required for a specific application. For example, the following Dockerfile starts with this image, copies in the `server.xml` that lists the features required by the application, and then uses the `installUtility` command to download those features from the online repository.
+
+```dockerfile
+FROM websphere-liberty:kernel
+COPY server.xml /opt/ibm/wlp/usr/servers/defaultServer/
+RUN installUtility install --acceptLicense defaultServer
+```
+
+The `common` image adds a set of features that are expected to be of use for a typical production scenario. These features are: `appSecurity-2.0`, `collectiveMember-1.0`, `localConnector-1.0`, `ldapRegistry-3.0`, `monitor-1.0`, `requestTiming-1.0`, `restConnector-1.0`, `sessionDatabase-1.0`, `ssl-1.0` and `webCache-1.0`. This image is the basis for the `webProfile6` and `webProfile7` images.
+
+The `webProfile6` image contains the features required for Java EE6 Web Profile compliance. It also pulls in additional features to bring the contents in to line with the features available for download via the runtime JAR, most notably the features required for OSGi applications.
+
+The `webProfile7` image contains the features required for Java EE7 Web Profile compliance. The `javaee7` image extends this image and adds the features required for Java EE7 Full Platform compliance. The `javaee7` image is also tagged with `latest`.
+
+There are also corresponding image tags that contain the version number of the Liberty release contained within the image. These are primarily to signpost the current version in use and will be replaced when a subsequent release becomes available. Consequently, only use these tags if you explicitly want your build to break when a new release becomes available. The Liberty zero migration policy means that you can use the non-version specific tags with the confidence that your application will continue to work when a new release becomes available.
 
 # Usage
 
-In order to use the image, it is necessary to accept the terms of the WebSphere
-Application Server for Developers and IBM JRE licenses. This is achieved by
-specifying the environment variable `LICENSE` equal to `accept` when running the
-image. You can also view the license terms by setting this variable to
-`view`. Failure to set the variable will result in the termination of the
-container with a usage statement.
+In order to use any of the images, it is necessary to accept the terms of the WebSphere Application Server for Developers license. This is achieved by specifying the environment variable `LICENSE` equal to `accept` when running an image. You can also view the license terms by setting this variable to `view`. Failure to set the variable will result in the termination of the container with a usage statement.
 
-The image is designed to support a number of different usage
-patterns. The following examples are based on the Liberty [application
-deployment sample][sample] and assume that
-[DefaultServletEngine.zip][zip] has been extracted to `/tmp` and the
-`server.xml` updated to accept HTTP connections from outside of the
-container by adding the following element inside the `server` stanza:
+The images are designed to support a number of different usage patterns. The following examples are based on the Java EE6 Liberty [application deployment sample](https://developer.ibm.com/wasdev/docs/article_appdeployment/) and assume that [DefaultServletEngine.zip](https://www.ibm.com/developerworks/mydeveloperworks/blogs/wasdev/resource/DefaultServletEngine.zip) has been extracted to `/tmp` and the `server.xml` updated to accept HTTP connections from outside of the container by adding the following element inside the `server` stanza:
 
-    <httpEndpoint host="*" httpPort="9080" httpsPort="-1"/>
+```xml
+<httpEndpoint host="*" httpPort="9080" httpsPort="-1"/>
+```
 
-1. The image contains a default server configuration that specifies the
-`webProfile-6.0` feature and exposes ports 9080 and 9443 for HTTP and HTTPS
-respectively. A WAR file can therefore be mounted in to the `dropins` directory
-of this server and run. The following example starts a container in the
-background running a WAR file from the host file system with the HTTP and HTTPS
-ports mapped to 80 and 443 respectively.
+1.	Each image contains a default server configuration that specifies the corresponding features and exposes ports 9080 and 9443 for HTTP and HTTPS respectively. A WAR file can therefore be mounted in to the `dropins` directory of this server and run. The following example starts a container in the background running a WAR file from the host file system with the HTTP and HTTPS ports mapped to 80 and 443 respectively.
 
-        docker run -e LICENSE=accept -d -p 80:9080 -p 443:9443 \
-          -v /tmp/DefaultServletEngine/dropins/Sample1.war:/opt/ibm/wlp/usr/servers/defaultServer/dropins/Sample1.war \
-          websphere-liberty
+	```console
+	$ docker run -e LICENSE=accept -d -p 80:9080 -p 443:9443 \
+	    -v /tmp/DefaultServletEngine/dropins/Sample1.war:/opt/ibm/wlp/usr/servers/defaultServer/dropins/Sample1.war \
+	    websphere-liberty:webProfile6
+	```
 
-    Once the server has started, you can browse to
-    http://localhost/Sample1/SimpleServlet on the Docker host.
+	Once the server has started, you can browse to http://localhost/Sample1/SimpleServlet on the Docker host.
 
-2. For greater flexibility over configuration, it is possible to mount
-an entire server configuration directory from the host and then
-specify the server name as a parameter to the run command. Note that
-this particular example server configuration only provides HTTP
-access.
+	Note: If you are using the boot2docker virtual machine on OS X or Windows, you'll need to get the IP of the virtual host using the command `boot2docker ip` instead of using localhost.
 
-        docker run -e LICENSE=accept -d -p 80:9080 \
-          -v /tmp/DefaultServletEngine:/opt/ibm/wlp/usr/servers/DefaultServletEngine \
-          websphere-liberty /opt/ibm/wlp/bin/server run DefaultServletEngine
-    
-3. It is also possible to build an application layer on top of this image using
-either the default server configuration or a new server configuration and,
-optionally, accept the license as part of that build. Here we have copied the
-`Sample1.war` from `/tmp/DefaultServletEngine/dropins` to the same directory as
-the following Dockerfile.
+2.	For greater flexibility over configuration, it is possible to mount an entire server configuration directory from the host and then specify the server name as a parameter to the run command. Note that this particular example server configuration only provides HTTP access.
 
-        FROM websphere-liberty
-        ADD Sample1.war /opt/ibm/wlp/usr/servers/defaultServer/dropins/
-        ENV LICENSE accept
+	```console
+	$ docker run -e LICENSE=accept -d -p 80:9080 \
+	  -v /tmp/DefaultServletEngine:/opt/ibm/wlp/usr/servers/DefaultServletEngine \
+	  websphere-liberty:webProfile6 /opt/ibm/wlp/bin/server run DefaultServletEngine
+	```
 
-This can then be built and run as follows:
+3.	It is also possible to build an application layer on top of this image using either the default server configuration or a new server configuration and, optionally, accept the license as part of that build. Here we have copied the `Sample1.war` from `/tmp/DefaultServletEngine/dropins` to the same directory as the following Dockerfile.
 
-        docker build -t app .
-        docker run -d -p 80:9080 -p 443:9443 app
+	```dockerfile
+	FROM websphere-liberty:webProfile6
+	ADD Sample1.war /opt/ibm/wlp/usr/servers/defaultServer/dropins/
+	ENV LICENSE accept
+	```
 
-4. Lastly, it is possible to mount a data volume container containing the
-application and the server configuration on to the image. This has the benefit
-that it has no dependency on files from the host but still allows the
-application container to be easily re-mounted on a newer version of the
-application server image. The example assumes that you have copied the
-`/tmp/DefaultServletEngine` directory in to the same directory as the
-Dockerfile.
+	This can then be built and run as follows:
 
-    Build and run the data volume container:
-    
-        FROM websphere-liberty
-        ADD DefaultServletEngine /opt/ibm/wlp/usr/servers/DefaultServletEngine
-    
-        docker build -t app-image .
-        docker run -d -v /opt/ibm/wlp/usr/servers/DefaultServletEngine \
-          --name app app-image true
-    
-    Run the WebSphere Liberty image with the volumes from the data
-    volume container mounted:
+	```console
+	$ docker build -t app .
+	$ docker run -d -p 80:9080 -p 443:9443 app
+	```
 
-        docker run -e LICENSE=accept -d -p 80:9080 \
-          --volumes-from app websphere-liberty \
-          /opt/ibm/wlp/bin/server run DefaultServletEngine
+4.	Lastly, it is possible to mount a data volume container containing the application and the server configuration on to the image. This has the benefit that it has no dependency on files from the host but still allows the application container to be easily re-mounted on a newer version of the application server image. The example assumes that you have copied the `/tmp/DefaultServletEngine` directory in to the same directory as the Dockerfile.
 
-[getting-started]: https://developer.ibm.com/wasdev/docs/category/getting-started/
-[sample]: https://developer.ibm.com/wasdev/docs/article_appdeployment/
-[zip]: https://www.ibm.com/developerworks/mydeveloperworks/blogs/wasdev/resource/DefaultServletEngine.zip
+	Build and run the data volume container:
+
+	```dockerfile
+	FROM websphere-liberty:webProfile6
+	ADD DefaultServletEngine /opt/ibm/wlp/usr/servers/DefaultServletEngine
+	```
+
+	```console
+	$ docker build -t app-image .
+	$ docker run -d -v /opt/ibm/wlp/usr/servers/DefaultServletEngine \
+	    --name app app-image true
+	```
+
+	Run the WebSphere Liberty image with the volumes from the data volume container mounted:
+
+	```console
+	$ docker run -e LICENSE=accept -d -p 80:9080 \
+	  --volumes-from app websphere-liberty:webProfile6 \
+	  /opt/ibm/wlp/bin/server run DefaultServletEngine
+	```
 
 # License
 
-The Dockerfile and associated scripts are licensed under the [Apache License
-2.0][apache-license]. The IBM JRE and WebSphere Application Server for
-Developers are licensed under the IBM International License Agreement for
-Non-Warranted Programs. Those licenses may be viewed from the image using the
-`LICENSE=view` environment variable as described above or may be found online
-for the [IBM JRE][jre-license] and [IBM WebSphere Application Server for
-Developers][liberty-license]. Note that this license does not permit further
-distribution and that the image is for development use only.
+The Dockerfiles and associated scripts are licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-[apache-license]: http://www.apache.org/licenses/LICENSE-2.0.html
-[jre-license]: https://www14.software.ibm.com/cgi-bin/weblap/lap.pl?la_formnum=&li_formnum=L-EWOD-99YA4J&title=IBM%C2%AE+SDK%2C+Java+Technology+Edition%2C+Version+7+Release+1&l=en
-[liberty-license]: https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.3/lafiles/runtime/en.html
+Licenses for the products installed within the images are as follows:
+
+-	[IBM WebSphere Application Server](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/8.5.5.5/lafiles/runtime/en.html) in the `latest`/`8.5.5` image (International License Agreement for Non-Warranted Programs)
+-	[IBM WebSphere Application Server Liberty v9 Beta with Java EE 7](https://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/wasdev/downloads/wlp/beta/lafiles/en.html) in the `beta` image (International License Agreement for Early Release of Programs)
+
+The product licenses associated with an image can be displayed by specifying the `LICENSE=view` environment variable as described above. Note that these licenses do not permit further distribution and that the terms for WebSphere Application Server in the `latest`/`8.5.5` image restrict usage to a developer machine or build server only, or subject to a maximum 2 gigabyte heap usage across all instances. Instructions are available to enable entitled customers to [upgrade](https://github.com/WASdev/ci.docker/tree/master/websphere-liberty/8.5.5/production-upgrade) the Docker Hub image for production use or [build](https://github.com/WASdev/ci.docker/tree/master/websphere-liberty/8.5.5/production-install) their own production licensed image.
 
 # Supported Docker versions
 
-This image is officially supported on Docker version 1.4.1.
+This image is officially supported on Docker version 1.8.2.
 
 Support for older versions (down to 1.0) is provided on a best-effort basis.
 
 # User Feedback
 
-For issues relating specifically to this Docker image, please use the [GitHub
-issue tracker][issues]. For more general issues relating to IBM WebSphere
-Application Server Liberty Profile you can [get help][help] through the WASdev
-community. We welcome contributions following [our guidelines][contributing].
-
-[issues]: https://github.com/WASdev/ci.docker/issues
-[help]: https://developer.ibm.com/wasdev/help/
-[contributing]: https://github.com/WASdev/wasdev.github.io/blob/master/CONTRIBUTING.md
+For issues relating specifically to this Docker image, please use the [GitHub issue tracker](https://github.com/WASdev/ci.docker/issues). For more general issues relating to IBM WebSphere Application Server Liberty Profile you can [get help](https://developer.ibm.com/wasdev/help/) through the WASdev community. We welcome contributions following [our guidelines](https://github.com/WASdev/wasdev.github.io/blob/master/CONTRIBUTING.md).

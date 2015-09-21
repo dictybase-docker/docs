@@ -1,7 +1,8 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
+helperDir='.template-helpers'
 
 repos=( "$@" )
 if [ ${#repos[@]} -eq 0 ]; then
@@ -20,6 +21,9 @@ replace_field() {
 }
 
 declare -A otherRepos=(
+	[aerospike]='https://github.com/aerospike/aerospike-server.docker'
+	[alpine]='https://github.com/gliderlabs/docker-alpine'
+	[arangodb]='https://github.com/arangodb/arangodb-docker'
 	[busybox]='https://github.com/jpetazzo/docker-busybox'
 	[centos]='https://github.com/CentOS/sig-cloud-instance-images'
 	[cirros]='https://github.com/ewindisch/docker-cirros'
@@ -29,13 +33,18 @@ declare -A otherRepos=(
 	[debian]='https://github.com/tianon/docker-brew-debian'
 	[docker-dev]='https://github.com/docker/docker'
 	[fedora]='https://github.com/lsm5/docker-brew-fedora'
-	[haskell]='https://github.com/darinmorrison/docker-haskell'
+	[gazebo]='https://github.com/osrf/docker_images'
+	[glassfish]='https://github.com/aws/aws-eb-glassfish'
+	[haskell]='https://github.com/freebroccolo/docker-haskell'
 	[hipache]='https://github.com/dotcloud/hipache'
 	[hylang]='https://github.com/hylang/hy'
 	[iojs]='https://github.com/iojs/docker-iojs'
 	[irssi]='https://github.com/jfrazelle/irssi'
 	[jenkins]='https://github.com/cloudbees/jenkins-ci.org-docker'
+	[jetty]='https://github.com/appropriate/docker-jetty'
+	[joomla]='https://github.com/joomla/docker-joomla'
 	[jruby]='https://github.com/cpuguy83/docker-jruby'
+	[kaazing-gateway]='https://github.com/kaazing/gateway.docker'
 	[mageia]='https://github.com/juanluisbaptiste/docker-brew-mageia'
 	[maven]='https://github.com/carlossg/docker-maven'
 	[mono]='https://github.com/mono/docker'
@@ -44,10 +53,17 @@ declare -A otherRepos=(
 	[node]='https://github.com/joyent/docker-node'
 	[odoo]='https://github.com/odoo/docker'
 	[opensuse]='https://github.com/openSUSE/docker-containers-build'
-	[oraclelinux]='https://github.com/oracle/docker-images'
+	[oraclelinux]='https://github.com/oracle/docker'
 	[perl]='https://github.com/Perl/docker-perl'
 	[r-base]='https://github.com/rocker-org/rocker'
+	[rakudo]='https://github.com/perl6/docker'
 	[registry]='https://github.com/docker/docker-registry'
+	[rethinkdb]='https://github.com/stuartpb/rethinkdb-dockerfiles'
+	[rocket.chat]='https://github.com/RocketChat/Docker.Official.Image'
+	[ros]='https://github.com/osrf/docker_images'
+	[sentry]='https://github.com/getsentry/docker-sentry'
+	[sonarqube]='https://github.com/SonarSource/docker-sonarqube'
+	[swarm]='https://github.com/docker/swarm-library-image'
 	[thrift]='https://github.com/ahawkins/docker-thrift'
 	[ubuntu-debootstrap]='https://github.com/tianon/docker-brew-ubuntu-debootstrap'
 	[ubuntu-upstart]='https://github.com/tianon/dockerfiles'
@@ -55,7 +71,7 @@ declare -A otherRepos=(
 	[websphere-liberty]='https://github.com/WASdev/ci.docker'
 )
 
-dockerLatest="$(curl -sSL 'https://get.docker.com/latest')"
+dockerLatest="$(curl -fsSL 'https://get.docker.com/latest')"
 
 for repo in "${repos[@]}"; do
 	if [ -x "$repo/update.sh" ]; then
@@ -75,9 +91,9 @@ for repo in "${repos[@]}"; do
 			mailingList=' '
 		fi
 		
-		dockerVersions="$(cat "$repo/docker-versions.md" 2>/dev/null || cat 'docker-versions.md')"
+		dockerVersions="$(cat "$repo/docker-versions.md" 2>/dev/null || cat "$helperDir/docker-versions.md")"
 		
-		userFeedback="$(cat "$repo/user-feedback.md" 2>/dev/null || cat 'user-feedback.md')"
+		userFeedback="$(cat "$repo/user-feedback.md" 2>/dev/null || cat "$helperDir/user-feedback.md")"
 		
 		license="$(cat "$repo/license.md" 2>/dev/null || true)"
 		if [ "$license" ]; then
@@ -87,19 +103,40 @@ for repo in "${repos[@]}"; do
 		logo=
 		if [ -e "$repo/logo.png" ]; then
 			logo="![logo](https://raw.githubusercontent.com/docker-library/docs/master/$repo/logo.png)"
+		elif [ -e "$repo/logo.svg" ]; then
+			# rawgit.com because: http://stackoverflow.com/a/16462143/433558
+			logo="![logo](https://rawgit.com/docker-library/docs/master/$repo/logo.svg)"
 		fi
 		
-		cp -v README-template.md "$repo/README.md"
+		compose=
+		composeYml=
+		if [ -f "$repo/docker-compose.yml" ]; then
+			compose="$(cat "$repo/compose.md" 2>/dev/null || cat "$helperDir/compose.md")"
+			composeYml=$'```yaml\n'"$(cat "$repo/docker-compose.yml")"$'\n```'
+		fi
 		
-		echo '  TAGS => ./generate-dockerfile-links-partial.sh'
-		replace_field "$repo" 'TAGS' "$(./generate-dockerfile-links-partial.sh "$repo")"
+		cp -v "$helperDir/template.md" "$repo/README.md"
+		
+		echo '  TAGS => generate-dockerfile-links-partial.sh'
+		partial="$("$helperDir/generate-dockerfile-links-partial.sh" "$repo")"
+		[ "$partial" ]
+		replace_field "$repo" 'TAGS' "$partial"
 		
 		echo '  CONTENT => '"$repo"'/content.md'
 		replace_field "$repo" 'CONTENT' "$(cat "$repo/content.md")"
 		
+		echo '  VARIANT => variant.sh'
+		replace_field "$repo" 'VARIANT' "$("$helperDir/variant.sh" "$repo")"
+		
 		# has to be after CONTENT because it's contained in content.md
 		echo "  LOGO => $logo"
 		replace_field "$repo" 'LOGO' "$logo" '\s*'
+		
+		echo '  COMPOSE => '"$repo"'/compose.md'
+		replace_field "$repo" 'COMPOSE' "$compose"
+		
+		echo '  COMPOSE-YML => '"$repo"'/docker-compose.yml'
+		replace_field "$repo" 'COMPOSE-YML' "$composeYml"
 		
 		echo '  DOCKER-VERSIONS => '"$repo"'/docker-versions.md'
 		replace_field "$repo" 'DOCKER-VERSIONS' "$dockerVersions"

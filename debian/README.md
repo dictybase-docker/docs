@@ -1,29 +1,28 @@
 # Supported tags and respective `Dockerfile` links
 
-- [`8.0`, `8`, `jessie` (*jessie/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/jessie/Dockerfile)
-- [`oldstable` (*oldstable/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/oldstable/Dockerfile)
-- [`sid` (*sid/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/sid/Dockerfile)
-- [`6.0.10`, `6.0`, `6`, `squeeze` (*squeeze/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/squeeze/Dockerfile)
-- [`stable` (*stable/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/stable/Dockerfile)
-- [`testing` (*testing/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/testing/Dockerfile)
-- [`unstable` (*unstable/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/unstable/Dockerfile)
-- [`7.8`, `7`, `wheezy`, `latest` (*wheezy/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/e4d0c608272bb00e25576fadda837d6d0380c13e/wheezy/Dockerfile)
-- [`rc-buggy` (*debian/rc-buggy/Dockerfile*)](https://github.com/tianon/dockerfiles/blob/ec9497f2742ff8def990c10d214194de145b9319/debian/rc-buggy/Dockerfile)
-- [`experimental` (*debian/experimental/Dockerfile*)](https://github.com/tianon/dockerfiles/blob/ec9497f2742ff8def990c10d214194de145b9319/debian/experimental/Dockerfile)
+-	[`8.2`, `8`, `jessie`, `latest` (*jessie/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/jessie/Dockerfile)
+-	[`jessie-backports` (*jessie/backports/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/jessie/backports/Dockerfile)
+-	[`oldstable` (*oldstable/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/oldstable/Dockerfile)
+-	[`oldstable-backports` (*oldstable/backports/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/oldstable/backports/Dockerfile)
+-	[`sid` (*sid/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/sid/Dockerfile)
+-	[`6.0.10`, `6.0`, `6`, `squeeze` (*squeeze/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/squeeze/Dockerfile)
+-	[`stable` (*stable/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/stable/Dockerfile)
+-	[`stable-backports` (*stable/backports/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/stable/backports/Dockerfile)
+-	[`stretch` (*stretch/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/stretch/Dockerfile)
+-	[`testing` (*testing/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/testing/Dockerfile)
+-	[`unstable` (*unstable/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/unstable/Dockerfile)
+-	[`7.9`, `7`, `wheezy` (*wheezy/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/wheezy/Dockerfile)
+-	[`wheezy-backports` (*wheezy/backports/Dockerfile*)](https://github.com/tianon/docker-brew-debian/blob/89e5cad1df49d5d6778a9d7cb23d4de2639e1542/wheezy/backports/Dockerfile)
+-	[`rc-buggy` (*debian/rc-buggy/Dockerfile*)](https://github.com/tianon/dockerfiles/blob/698f86772367cf08c80396a1624b4d8fb59f94aa/debian/rc-buggy/Dockerfile)
+-	[`experimental` (*debian/experimental/Dockerfile*)](https://github.com/tianon/dockerfiles/blob/698f86772367cf08c80396a1624b4d8fb59f94aa/debian/experimental/Dockerfile)
 
-For more information about this image and its history, please see the [relevant
-manifest file
-(`library/debian`)](https://github.com/docker-library/official-images/blob/master/library/debian)
-in the [`docker-library/official-images` GitHub
-repo](https://github.com/docker-library/official-images).
+For more information about this image and its history, please see [the relevant manifest file (`library/debian`)](https://github.com/docker-library/official-images/blob/master/library/debian). This image is updated via pull requests to [the `docker-library/official-images` GitHub repo](https://github.com/docker-library/official-images).
+
+For detailed information about the virtual/transfer sizes and individual layers of each of the above supported tags, please see [the `debian/tag-details.md` file](https://github.com/docker-library/docs/blob/master/debian/tag-details.md) in [the `docker-library/docs` GitHub repo](https://github.com/docker-library/docs).
 
 # What is Debian?
 
-Debian is an operating system which is composed primarily of free and
-open-source software, most of which is under the GNU General Public License, and
-developed by a group of individuals known as the Debian project. Debian is one
-of the most popular Linux distributions for personal computers and network
-servers, and has been used as a base for several other Linux distributions.
+Debian is an operating system which is composed primarily of free and open-source software, most of which is under the GNU General Public License, and developed by a group of individuals known as the Debian project. Debian is one of the most popular Linux distributions for personal computers and network servers, and has been used as a base for several other Linux distributions.
 
 > [wikipedia.org/wiki/Debian](https://en.wikipedia.org/wiki/Debian)
 
@@ -31,50 +30,42 @@ servers, and has been used as a base for several other Linux distributions.
 
 # About this image
 
-The `debian:latest` tag will always point the latest stable release (which is,
-at the time of this writing, `debian:wheezy`).  Stable releases are also tagged
-with their version (ie, `debian:wheezy` is currently also the same as
-`debian:7.4`).
+The `debian:latest` tag will always point the latest stable release (which is, at the time of this writing, `debian:jessie`). Stable releases are also tagged with their version (ie, `debian:8` is an alias for `debian:jessie`, `debian:7` is an alias for `debian:wheezy`, etc).
 
-The rolling tags (`debian:stable`, `debian:testing`, etc) use the rolling suite
-names in their `/etc/apt/sources.list` file (ie, `deb
-http://http.debian.net/debian testing main`).
+The rolling tags (`debian:stable`, `debian:testing`, etc) use the rolling suite names in their `/etc/apt/sources.list` file (ie, `deb
+http://httpredir.debian.org/debian testing main`).
 
-## sources.list
+## `/etc/apt/sources.list`
 
-The mirror of choice for these images is
-[http.debian.net](http://http.debian.net) so that it's as close to optimal for
-everyone as possible, regardless of location.
+The mirror of choice for these images is [httpredir.debian.org](http://httpredir.debian.org) so that it's as close to optimal as possible, regardless of location or connection.
 
-    $ docker run debian:wheezy cat /etc/apt/sources.list
-    deb http://http.debian.net/debian wheezy main
-    deb http://http.debian.net/debian wheezy-updates main
-    deb http://security.debian.org/ wheezy/updates main
+```console
+$ docker run debian:jessie cat /etc/apt/sources.list
+deb http://httpredir.debian.org/debian jessie main
+deb http://httpredir.debian.org/debian jessie-updates main
+deb http://security.debian.org jessie/updates main
+```
 
 # Supported Docker versions
 
-This image is officially supported on Docker version 1.4.1.
+This image is officially supported on Docker version 1.8.2.
 
 Support for older versions (down to 1.0) is provided on a best-effort basis.
 
 # User Feedback
 
+## Documentation
+
+Documentation for this image is stored in the [`debian/` directory](https://github.com/docker-library/docs/tree/master/debian) of the [`docker-library/docs` GitHub repo](https://github.com/docker-library/docs). Be sure to familiarize yourself with the [repository's `README.md` file](https://github.com/docker-library/docs/blob/master/README.md) before attempting a pull request.
+
 ## Issues
 
-If you have any problems with or questions about this image, please contact us
- through a [GitHub issue](https://github.com/tianon/docker-brew-debian/issues).
+If you have any problems with or questions about this image, please contact us through a [GitHub issue](https://github.com/tianon/docker-brew-debian/issues).
 
-You can also reach many of the official image maintainers via the
-`#docker-library` IRC channel on [Freenode](https://freenode.net).
+You can also reach many of the official image maintainers via the `#docker-library` IRC channel on [Freenode](https://freenode.net).
 
 ## Contributing
 
-You are invited to contribute new features, fixes, or updates, large or small;
-we are always thrilled to receive pull requests, and do our best to process them
-as fast as we can.
+You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
 
-Before you start to code, we recommend discussing your plans 
-through a [GitHub issue](https://github.com/tianon/docker-brew-debian/issues), especially for more ambitious
-contributions. This gives other contributors a chance to point you in the right
-direction, give you feedback on your design, and help you find out if someone
-else is working on the same thing.
+Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/tianon/docker-brew-debian/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.

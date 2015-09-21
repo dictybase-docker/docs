@@ -1,18 +1,14 @@
 # Supported tags and respective `Dockerfile` links
 
-- [`6.4.4`, `6.4`, `6`, `latest` (*Dockerfile*)](https://github.com/docker-library/sentry/blob/08e7bf99eee1e7a879422fc474b73a6fafecbc31/Dockerfile)
+-	[`7.7.0`, `7.7`, `7`, `latest` (*Dockerfile*)](https://github.com/getsentry/docker-sentry/blob/3115587c614e64c66419a26b4f7be6ac067e3a79/Dockerfile)
 
-For more information about this image and its history, please see the [relevant
-manifest file
-(`library/sentry`)](https://github.com/docker-library/official-images/blob/master/library/sentry)
-in the [`docker-library/official-images` GitHub
-repo](https://github.com/docker-library/official-images).
+For more information about this image and its history, please see [the relevant manifest file (`library/sentry`)](https://github.com/docker-library/official-images/blob/master/library/sentry). This image is updated via pull requests to [the `docker-library/official-images` GitHub repo](https://github.com/docker-library/official-images).
+
+For detailed information about the virtual/transfer sizes and individual layers of each of the above supported tags, please see [the `sentry/tag-details.md` file](https://github.com/docker-library/docs/blob/master/sentry/tag-details.md) in [the `docker-library/docs` GitHub repo](https://github.com/docker-library/docs).
 
 # What is Sentry?
 
-Sentry is a realtime event logging and aggregation platform. It specializes in
-monitoring errors and extracting all the information needed to do a proper
-post-mortem without any of the hassle of the standard user feedback loop.
+Sentry is a realtime event logging and aggregation platform. It specializes in monitoring errors and extracting all the information needed to do a proper post-mortem without any of the hassle of the standard user feedback loop.
 
 > [github.com/getsentry/sentry](https://github.com/getsentry/sentry)
 
@@ -20,71 +16,94 @@ post-mortem without any of the hassle of the standard user feedback loop.
 
 # How to use this image
 
-## start a sentry instance
+## how to setup a full sentry instance
 
-### PostgreSQL database (as recommended by upstream)
+1.	start a redis container
 
-    docker run --name some-sentry --link some-postgres:postgres -d sentry
+	```console
+	$ docker run -d --name some-redis redis
+	```
 
-### MySQL database
+2.	start a database container:
 
-    docker run --name some-sentry --link some-mysql:mysql -d sentry
+	-	Postgres (recommended by upstream):
 
-### Redis buffering (recommended by upstream for any real workloads)
+		```console
+		$ docker run -d --name some-postgres -e POSTGRES_PASSWORD=secret -e POSTGRES_USER=sentry postgres
+		```
 
-To enable Update Buffers using Redis, just add `--link some-redis:redis` to the
-`docker run` arguments of your service.
+	-	MySQL (later steps assume PostgreSQL, replace the `--link some-postgres:postres` with `--link some-mysql:mysql`):
+
+		```console
+		$ docker run -d --name some-mysql -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=sentry mysql
+		```
+
+3.	now start up sentry server
+
+	```console
+	$ docker run -d --name some-sentry --link some-redis:redis --link some-postgres:postgres sentry
+	```
+
+4.	if this is a new database, you'll need to run `sentry upgrade`
+
+	```console
+	$ docker run -it --rm --link some-postgres:postgres --link some-redis:redis sentry sentry upgrade
+	```
+
+	**Note: the `-it` is important as the initial upgrade will prompt to create an initial user and will fail without it**
+
+5.	the default config needs a celery beat and celery workers, start as many workers as you need (each with a unique name)
+
+	-	using the celery image:
+
+		```console
+		$ docker run -d --name celery-beat --link some-redis:redis  -e CELERY_BROKER_URL=redis://redis celery celery beat
+		$ docker run -d --name celery-worker1 --link some-redis:redis  -e CELERY_BROKER_URL=redis://redis celery
+		```
+
+	-	using the celery bundled with sentry
+
+		```console
+		$ docker run -d --name sentry-celery-beat --link some-redis:redis sentry sentry celery beat
+		$ docker run -d --name sentry-celery1 --link some-redis:redis sentry sentry celery worker
+		```
 
 ### port mapping
 
-If you'd like to be able to access the instance from the host without the
-container's IP, standard port mappings can be used.  Just add `-p 8080:9000` to
-the `docker run` arguments and then access either `http://localhost:8080` or
-`http://host-ip:8080` in a browser.
+If you'd like to be able to access the instance from the host without the container's IP, standard port mappings can be used. Just add `-p 8080:9000` to the `docker run` arguments and then access either `http://localhost:8080` or `http://host-ip:8080` in a browser.
 
 ## configuring the initial user
 
-The following assumes you chose PostgreSQL.  If you did not, just replace the
-`--link` entries appropriately:
+If you did not create a superuser during `sentry upgrade`, use the following to create one:
 
-    docker run -it --rm --link some-postgres:postgres sentry sentry createsuperuser
-
-Once the user is created, you must run the following to give them the proper
-teams/access within the database: (replace `<username>` here with whatever was
-entered as the "Username" when prompted by `createsuperuser` above)
-
-    docker run -it --rm --link some-postgres:postgres sentry sentry repair --owner=<username>
+```console
+$ docker run -it --rm --link some-postgres:postgres sentry sentry createsuperuser
+```
 
 # License
 
-View [license
-information](https://github.com/getsentry/sentry/blob/master/LICENSE) for the
-software contained in this image.
+View [license information](https://github.com/getsentry/sentry/blob/master/LICENSE) for the software contained in this image.
 
 # Supported Docker versions
 
-This image is officially supported on Docker version 1.4.1.
+This image is officially supported on Docker version 1.8.2.
 
 Support for older versions (down to 1.0) is provided on a best-effort basis.
 
 # User Feedback
 
+## Documentation
+
+Documentation for this image is stored in the [`sentry/` directory](https://github.com/docker-library/docs/tree/master/sentry) of the [`docker-library/docs` GitHub repo](https://github.com/docker-library/docs). Be sure to familiarize yourself with the [repository's `README.md` file](https://github.com/docker-library/docs/blob/master/README.md) before attempting a pull request.
+
 ## Issues
 
-If you have any problems with or questions about this image, please contact us
- through a [GitHub issue](https://github.com/docker-library/sentry/issues).
+If you have any problems with or questions about this image, please contact us through a [GitHub issue](https://github.com/getsentry/docker-sentry/issues).
 
-You can also reach many of the official image maintainers via the
-`#docker-library` IRC channel on [Freenode](https://freenode.net).
+You can also reach many of the official image maintainers via the `#docker-library` IRC channel on [Freenode](https://freenode.net).
 
 ## Contributing
 
-You are invited to contribute new features, fixes, or updates, large or small;
-we are always thrilled to receive pull requests, and do our best to process them
-as fast as we can.
+You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
 
-Before you start to code, we recommend discussing your plans 
-through a [GitHub issue](https://github.com/docker-library/sentry/issues), especially for more ambitious
-contributions. This gives other contributors a chance to point you in the right
-direction, give you feedback on your design, and help you find out if someone
-else is working on the same thing.
+Before you start to code, we recommend discussing your plans through a [GitHub issue](https://github.com/getsentry/docker-sentry/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.
