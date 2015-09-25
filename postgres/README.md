@@ -1,17 +1,15 @@
 # Supported tags and respective `Dockerfile` links
 
-- [`8.4.22`, `8.4`, `8` (*8.4/Dockerfile*)](https://github.com/dictybase-docker/postgres/blob/e1e0b57/8.4/Dockerfile)
-- [`9.0.18`, `9.0` (*9.0/Dockerfile*)](https://github.com/dictybase-docker/postgres/blob/e1e0b57/9.0/Dockerfile)
-- [`9.1.14`, `9.1` (*9.1/Dockerfile*)](https://github.com/dictybase-docker/postgres/blob/e1e0b57/9.1/Dockerfile)
-- [`9.2.9`, `9.2` (*9.2/Dockerfile*)](https://github.com/dictybase-docker/postgres/blob/e1e0b57/9.2/Dockerfile)
-- [`9.3.5`, `9.3` (*9.3/Dockerfile*)](https://github.com/dictybase-docker/postgres/blob/e1e0b57/9.3/Dockerfile)
-- [`9.4.0`, `9.4`, `9`, `latest` (*9.4/Dockerfile*)](https://github.com/dictybase-docker/postgres/blob/e1e0b57/9.4/Dockerfile)
+-	[`9.0.22`, `9.0` (*9.0/Dockerfile*)](https://github.com/docker-library/postgres/blob/cd294bf8dfdf4a74b2077aa6413fa579f9bf07de/9.0/Dockerfile)
+-	[`9.1.18`, `9.1` (*9.1/Dockerfile*)](https://github.com/docker-library/postgres/blob/cd294bf8dfdf4a74b2077aa6413fa579f9bf07de/9.1/Dockerfile)
+-	[`9.2.13`, `9.2` (*9.2/Dockerfile*)](https://github.com/docker-library/postgres/blob/cd294bf8dfdf4a74b2077aa6413fa579f9bf07de/9.2/Dockerfile)
+-	[`9.3.9`, `9.3` (*9.3/Dockerfile*)](https://github.com/docker-library/postgres/blob/cd294bf8dfdf4a74b2077aa6413fa579f9bf07de/9.3/Dockerfile)
+-	[`9.4.4`, `9.4`, `9`, `latest` (*9.4/Dockerfile*)](https://github.com/docker-library/postgres/blob/cd294bf8dfdf4a74b2077aa6413fa579f9bf07de/9.4/Dockerfile)
+-	[`9.5-alpha2`, `9.5` (*9.5/Dockerfile*)](https://github.com/docker-library/postgres/blob/cd294bf8dfdf4a74b2077aa6413fa579f9bf07de/9.5/Dockerfile)
 
-For more information about this image and its history, please see the [relevant
-manifest file
-(`library/postgres`)](https://github.com/docker-library/official-images/blob/master/library/postgres)
-in the [`docker-library/official-images` GitHub
-repo](https://github.com/docker-library/official-images).
+For more information about this image and its history, please see [the relevant manifest file (`library/postgres`)](https://github.com/docker-library/official-images/blob/master/library/postgres). This image is updated via pull requests to [the `docker-library/official-images` GitHub repo](https://github.com/docker-library/official-images).
+
+For detailed information about the virtual/transfer sizes and individual layers of each of the above supported tags, please see [the `postgres/tag-details.md` file](https://github.com/docker-library/docs/blob/master/postgres/tag-details.md) in [the `docker-library/docs` GitHub repo](https://github.com/docker-library/docs).
 
 
 ![logo](https://raw.githubusercontent.com/docker-library/docs/master/postgres/logo.png)
@@ -24,7 +22,7 @@ This image is based on a forked version of [official](https://registry.hub.docke
 * Allow to create additional admin superuser during container creation.
 
 
-## Staring an container
+## Staring a container
 
     docker run --name pgdata -v /var/lib/postgresql/data busybox echo data only container for postgresql
 
@@ -93,6 +91,20 @@ If `ADMIN_DB` is unset, the value of `ADMIN_USER` is by default.
     docker run --name some-postgres --volumes-from pgdata \ 
     -p 5432:5432 -e ADMIN_USER=admin -e ADMIN_PASS=admin \
     -d postgres
+
+## Kubernetes secrets
+The container support use of [kubernetes](http://kubernetes.io)
+[secrets](http://kubernetes.io/v1.0/docs/user-guide/secrets.html#secrets)
+to set up the values of environment variables. To use it in kubernetes pod
+creation...
+
+* Mount the secrets under `/secrets` folder
+* Use the following keys for matching the environmental variables
+
+    POSTGRES_PASSWORD : pgpass
+    ADMIN_USER : adminuser
+    ADMIN_PASS : adminpass
+    ADMIN_DB : admindb
 
 
 # Extending this image
@@ -170,28 +182,24 @@ start several containers simultaneously.
 
 # Supported Docker versions
 
-This image is officially supported on Docker version 1.4.1.
+This image is officially supported on Docker version 1.8.2.
 
 Support for older versions (down to 1.0) is provided on a best-effort basis.
 
 # User Feedback
 
+## Documentation
+
+Documentation for this image is stored in the [`postgres/` directory](https://github.com/docker-library/docs/tree/master/postgres) of the [`docker-library/docs` GitHub repo](https://github.com/docker-library/docs). Be sure to familiarize yourself with the [repository's `README.md` file](https://github.com/docker-library/docs/blob/master/README.md) before attempting a pull request.
+
 ## Issues
 
-If you have any problems with or questions about this image, please contact us
- on the [mailing list](http://www.postgresql.org/community/lists/subscribe/) or through a [GitHub issue](https://github.com/docker-library/postgres/issues).
+If you have any problems with or questions about this image, please contact us on the [mailing list](http://www.postgresql.org/community/lists/subscribe/) or through a [GitHub issue](https://github.com/docker-library/postgres/issues).
 
-You can also reach many of the official image maintainers via the
-`#docker-library` IRC channel on [Freenode](https://freenode.net).
+You can also reach many of the official image maintainers via the `#docker-library` IRC channel on [Freenode](https://freenode.net).
 
 ## Contributing
 
-You are invited to contribute new features, fixes, or updates, large or small;
-we are always thrilled to receive pull requests, and do our best to process them
-as fast as we can.
+You are invited to contribute new features, fixes, or updates, large or small; we are always thrilled to receive pull requests, and do our best to process them as fast as we can.
 
-Before you start to code, we recommend discussing your plans on the [mailing list](http://www.postgresql.org/community/lists/subscribe/) or 
-through a [GitHub issue](https://github.com/docker-library/postgres/issues), especially for more ambitious
-contributions. This gives other contributors a chance to point you in the right
-direction, give you feedback on your design, and help you find out if someone
-else is working on the same thing.
+Before you start to code, we recommend discussing your plans on the [mailing list](http://www.postgresql.org/community/lists/subscribe/) or through a [GitHub issue](https://github.com/docker-library/postgres/issues), especially for more ambitious contributions. This gives other contributors a chance to point you in the right direction, give you feedback on your design, and help you find out if someone else is working on the same thing.

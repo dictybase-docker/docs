@@ -79,6 +79,20 @@ If `ADMIN_DB` is unset, the value of `ADMIN_USER` is by default.
     -p 5432:5432 -e ADMIN_USER=admin -e ADMIN_PASS=admin \
     -d postgres
 
+## Kubernetes secrets
+The container support use of [kubernetes](http://kubernetes.io)
+[secrets](http://kubernetes.io/v1.0/docs/user-guide/secrets.html#secrets)
+to set up the values of environment variables. To use it in kubernetes pod
+creation...
+
+* Mount the secrets under `/secrets` folder
+* Use the following keys for matching the environmental variables
+
+    POSTGRES_PASSWORD : pgpass
+    ADMIN_USER : adminuser
+    ADMIN_PASS : adminpass
+    ADMIN_DB : admindb
+
 
 # Extending this image
 
